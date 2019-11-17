@@ -20,7 +20,7 @@ ifeq ($(GCC_VER_49),1)
 EXTRA_CFLAGS += -Wno-date-time	# Fix compile error && warning on gcc 4.9 and later
 endif
 
-EXTRA_CFLAGS += -I/$(srctree)/$(src)/include
+EXTRA_CFLAGS += -I/$(src)/include
 
 EXTRA_LDFLAGS += --strip-debug
 
@@ -170,7 +170,7 @@ CONFIG_CUSTOMER_HUAWEI_GENERAL = n
 
 CONFIG_DRVEXT_MODULE = n
 
-export TopDIR ?= /$(srctree)/$(src)
+export TopDIR ?= /$(src)
 
 ########### COMMON  #################################
 ifeq ($(CONFIG_GSPI_HCI), y)
@@ -235,10 +235,10 @@ _HAL_INTFS_FILES :=	hal/hal_intf.o \
 			hal/led/hal_$(HCI_NAME)_led.o
 
 
-EXTRA_CFLAGS += -I/$(srctree)/$(src)/platform
+EXTRA_CFLAGS += -I/$(src)/platform
 _PLATFORM_FILES := platform/platform_ops.o
 
-EXTRA_CFLAGS += -I/$(srctree)/$(src)/hal/btc
+EXTRA_CFLAGS += -I/$(src)/hal/btc
 
 ########### HAL_RTL8188E #################################
 ifeq ($(CONFIG_RTL8188E), y)
@@ -2154,16 +2154,16 @@ endif
 ifneq ($(KERNELRELEASE),)
 
 ########### this part for *.mk ############################
-include /$(srctree)/$(src)/hal/phydm/phydm.mk
+include /$(src)/hal/phydm/phydm.mk
 
 ########### HAL_RTL8822B #################################
 ifeq ($(CONFIG_RTL8822B), y)
-include /$(srctree)/$(src)/rtl8822b.mk
+include /$(src)/rtl8822b.mk
 endif
 
 ########### HAL_RTL8821C #################################
 ifeq ($(CONFIG_RTL8821C), y)
-include /$(srctree)/$(src)/rtl8821c.mk
+include /$(src)/rtl8821c.mk
 endif
 
 rtk_core :=	core/rtw_cmd.o \
@@ -2225,7 +2225,9 @@ ifeq ($(CONFIG_RTL8723B), y)
 $(MODULE_NAME)-$(CONFIG_MP_INCLUDED)+= core/rtw_bt_mp.o
 endif
 
-obj-$(CONFIG_RTL8821CE) := $(MODULE_NAME).o
+# Always build and set obj-m specifically regardless of external config
+# obj-$(CONFIG_RTL8821CE) = $(MODULE_NAME).o
+obj-m = $(MODULE_NAME).o
 
 else
 
@@ -2234,6 +2236,7 @@ export CONFIG_RTL8821CE = m
 all: modules
 
 modules:
+	# make -C /lib/modules/4.15.0-65-generic/build M=/media/data/shared_dev/rtl8821ce modules
 	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KSRC) M=$(shell pwd)  modules
 
 strip:
