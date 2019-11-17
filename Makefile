@@ -2225,7 +2225,9 @@ ifeq ($(CONFIG_RTL8723B), y)
 $(MODULE_NAME)-$(CONFIG_MP_INCLUDED)+= core/rtw_bt_mp.o
 endif
 
-obj-$(CONFIG_RTL8821CE) := $(MODULE_NAME).o
+# Always build and set obj-m specifically regardless of external config
+# obj-$(CONFIG_RTL8821CE) = $(MODULE_NAME).o
+obj-m = $(MODULE_NAME).o
 
 else
 
@@ -2234,6 +2236,7 @@ export CONFIG_RTL8821CE = m
 all: modules
 
 modules:
+	# make -C /lib/modules/4.15.0-65-generic/build M=/media/data/shared_dev/rtl8821ce modules
 	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KSRC) M=$(shell pwd)  modules
 
 strip:
