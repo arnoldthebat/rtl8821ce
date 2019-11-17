@@ -12,3 +12,4 @@
 Module.symvers
 modules.builtin
 modules.order
+.cache.mk
