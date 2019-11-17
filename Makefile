@@ -7,6 +7,7 @@ EXTRA_CFLAGS += -O1
 #EXTRA_CFLAGS += -pedantic
 #EXTRA_CFLAGS += -Wshadow -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
 
+EXTRA_CFLAGS += -Wno-vla
 EXTRA_CFLAGS += -Wno-unused-variable
 EXTRA_CFLAGS += -Wno-unused-value
 EXTRA_CFLAGS += -Wno-unused-label
@@ -20,7 +21,7 @@ ifeq ($(GCC_VER_49),1)
 EXTRA_CFLAGS += -Wno-date-time	# Fix compile error && warning on gcc 4.9 and later
 endif
 
-EXTRA_CFLAGS += -I/$(src)/include
+EXTRA_CFLAGS += -I/$(srctree)/$(src)/include
 
 EXTRA_LDFLAGS += --strip-debug
 
@@ -82,7 +83,7 @@ CONFIG_RTW_REPEATER_SON = n
 CONFIG_RTW_WIFI_HAL = n
 CONFIG_ICMP_VOQ = n
 ########################## Debug ###########################
-CONFIG_RTW_DEBUG = y
+CONFIG_RTW_DEBUG = n
 # default log level is _DRV_INFO_ = 4,
 # please refer to "How_to_set_driver_debug_log_level.doc" to set the available level.
 CONFIG_RTW_LOG_LEVEL = 4
@@ -170,7 +171,7 @@ CONFIG_CUSTOMER_HUAWEI_GENERAL = n
 
 CONFIG_DRVEXT_MODULE = n
 
-export TopDIR ?= /$(src)
+export TopDIR ?= /$(srctree)/$(src)
 
 ########### COMMON  #################################
 ifeq ($(CONFIG_GSPI_HCI), y)
@@ -235,10 +236,10 @@ _HAL_INTFS_FILES :=	hal/hal_intf.o \
 			hal/led/hal_$(HCI_NAME)_led.o
 
 
-EXTRA_CFLAGS += -I/$(src)/platform
+EXTRA_CFLAGS += -I/$(srctree)/$(src)/platform
 _PLATFORM_FILES := platform/platform_ops.o
 
-EXTRA_CFLAGS += -I/$(src)/hal/btc
+EXTRA_CFLAGS += -I/$(srctree)/$(src)/hal/btc
 
 ########### HAL_RTL8188E #################################
 ifeq ($(CONFIG_RTL8188E), y)
@@ -2154,16 +2155,16 @@ endif
 ifneq ($(KERNELRELEASE),)
 
 ########### this part for *.mk ############################
-include /$(src)/hal/phydm/phydm.mk
+include /$(srctree)/$(src)/hal/phydm/phydm.mk
 
 ########### HAL_RTL8822B #################################
 ifeq ($(CONFIG_RTL8822B), y)
-include /$(src)/rtl8822b.mk
+include /$(srctree)/$(src)/rtl8822b.mk
 endif
 
 ########### HAL_RTL8821C #################################
 ifeq ($(CONFIG_RTL8821C), y)
-include /$(src)/rtl8821c.mk
+include /$(srctree)/$(src)/rtl8821c.mk
 endif
 
 rtk_core :=	core/rtw_cmd.o \
@@ -2225,9 +2226,7 @@ ifeq ($(CONFIG_RTL8723B), y)
 $(MODULE_NAME)-$(CONFIG_MP_INCLUDED)+= core/rtw_bt_mp.o
 endif
 
-# Always build and set obj-m specifically regardless of external config
-# obj-$(CONFIG_RTL8821CE) = $(MODULE_NAME).o
-obj-m = $(MODULE_NAME).o
+obj-$(CONFIG_RTL8821CE) := $(MODULE_NAME).o
 
 else
 
@@ -2236,7 +2235,6 @@ export CONFIG_RTL8821CE = m
 all: modules
 
 modules:
-	# make -C /lib/modules/4.15.0-65-generic/build M=/media/data/shared_dev/rtl8821ce modules
 	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KSRC) M=$(shell pwd)  modules
 
 strip:
